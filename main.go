@@ -1,6 +1,8 @@
 // Reset USB device, point is to not have to physically re-plug the device
 // Reimplementation of code from https://askubuntu.com/questions/645/how-do-you-reset-a-usb-device-from-the-command-line
-// Use lsusb to identify vendor/product on the bus
+// Use lsusb to identify vendor/product on the bus.
+// Requires linux and devfs to be mounted on /dev
+//
 // Example: ./usbreset -v 1a86 -p 7523 -d true
 // lsusb output was:
 // Bus 003 Device 002: ID 1a86:7523 QinHeng Electronics CH340 serial converter
@@ -72,6 +74,8 @@ func main() {
 			fail("Could not find bus/dev, contents were: "+string(c), nil)
 		}
 
+		// the device filesystem could be mounted anywhere, not just /dev
+		// but we assume its mounted on /dev
 		pathToReset = path.Join("/dev/bus/usb", bus, dev)
 		break
 	}
