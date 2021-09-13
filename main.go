@@ -2,6 +2,8 @@
 // Reimplementation of code from https://askubuntu.com/questions/645/how-do-you-reset-a-usb-device-from-the-command-line
 // Use lsusb to identify vendor/product on the bus
 // Example: ./usbreset -v 1a86 -p 7523 -d true
+// lsusb output was:
+// Bus 003 Device 002: ID 1a86:7523 QinHeng Electronics CH340 serial converter
 
 package main
 
@@ -64,8 +66,6 @@ func main() {
 			if bytes.HasPrefix(line, []byte("DEVNUM=")) {
 				dev = string(bytes.TrimPrefix(line, []byte("DEVNUM=")))
 			}
-
-			continue
 		}
 
 		if bus == "" || dev == "" {
