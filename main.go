@@ -40,11 +40,16 @@ func main() {
 	}
 	var pathToReset string
 
+	// look at usb_device types only (usb_interface devices have a directory
+	// in the form of 1-1:1-1), we want to reset devices
 	m, err := filepath.Glob("/sys/bus/usb/devices/[0-9]*-[0-9]*/uevent")
 	if err != nil {
 		fail("Could not glob /sys/bus/usb/devices/", err)
 	}
 
+	// the uevent file will contain DEVTYPE=usb_device, we assume that is the case
+	// it will also contain PRODUCT=1a86/7523/264 this is what we look for in the
+	// file, and if found, we are interested in the BUSNUM= and DEVNUM= lines
 	search := []byte("PRODUCT=" + *vendor + "/" + *product)
 	for _, p := range m {
 		c, err := ioutil.ReadFile(p)
@@ -90,6 +95,7 @@ func main() {
 		fail("Could not open file", err)
 	}
 
+	// send the magic ioctl incantation to reset the device
 	const USBDEVFS_RESET = 'U'<<(4*2) | 20
 	if err = unix.IoctlSetInt(int(h.Fd()), USBDEVFS_RESET, 0); err != nil {
 		fail("Could not reset", err)
