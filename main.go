@@ -38,7 +38,7 @@ func main() {
 	}
 	var pathToReset string
 
-	m, err := filepath.Glob("/sys/bus/usb/devices/[0-9]-[0-9]/uevent")
+	m, err := filepath.Glob("/sys/bus/usb/devices/[0-9]*-[0-9]*/uevent")
 	if err != nil {
 		fail("Could not glob /sys/bus/usb/devices/", err)
 	}
