@@ -23,18 +23,18 @@ import (
 
 var vendor = flag.String("vendor", "", "The USB vendor id of the usb device that shall be reset (ex: 1a86")
 var product = flag.String("product", "", "The USB product id of the usb device that shall be reset (ex: 7523)")
-var pathToReset = flag.String("pathToReset", "", "The USB device path")
+var resetPath = flag.String("resetPath", "", "The USB device path to reset")
 var debug = flag.Bool("debug", false, "debug mode")
 
 func init() {
 	flag.StringVar(vendor, "v", "", "(shorthand for --vendor)")
 	flag.StringVar(product, "p", "", "(shorthand for --product)")
-	flag.StringVar(pathToReset, "rp", "", "(shorthand for --pathToReset)")
+	flag.StringVar(resetPath, "rp", "", "(shorthand for --resetPath)")
 	flag.BoolVar(debug, "d", false, "(shorthand for --debug)")
 }
 
 func getPathFromVendorProduct() string {
-	var pathToReset string
+	var resetPath string
 	// look at usb_device types only (usb_interface devices have a directory
 	// in the form of 1-1:1-1), we want to reset devices
 	m, err := filepath.Glob("/sys/bus/usb/devices/[0-9]*-[0-9]*/uevent")
@@ -76,30 +76,30 @@ func getPathFromVendorProduct() string {
 
 		// the device filesystem could be mounted anywhere, not just /dev
 		// but we assume its mounted on /dev
-		pathToReset = path.Join("/dev/bus/usb", bus, dev)
+		resetPath = path.Join("/dev/bus/usb", bus, dev)
 		break
 	}
 
-	return pathToReset
+	return resetPath
 }
 func main() {
 	flag.Parse()
 
-	if *pathToReset == "" && (*vendor == "" || *product == "") {
+	if *resetPath == "" && (*vendor == "" || *product == "") {
 		flag.PrintDefaults()
 		fail("No path/vendor/product to reset specified!", nil)
 	}
 
-	if *pathToReset == "" {
-		*pathToReset = getPathFromVendorProduct()
+	if *resetPath == "" {
+		*resetPath = getPathFromVendorProduct()
 	}
 
-	if *pathToReset == "" {
+	if *resetPath == "" {
 		fail("Could not ascertain path to reset", nil)
 	}
 
-	d("Resetting: " + *pathToReset)
-	h, err := os.OpenFile(*pathToReset, os.O_WRONLY, 666)
+	d("Resetting: " + *resetPath)
+	h, err := os.OpenFile(*resetPath, os.O_WRONLY, 666)
 	if err != nil {
 		fail("Could not open file", err)
 	}
