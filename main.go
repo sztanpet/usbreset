@@ -4,6 +4,7 @@
 // Requires linux and devfs to be mounted on /dev
 //
 // Example: ./usbreset -v 1a86 -p 7523 -d true
+// Example 2: ./usbreset -rp /dev/bus/usb/003/002 -d true
 // lsusb output was:
 // Bus 003 Device 002: ID 1a86:7523 QinHeng Electronics CH340 serial converter
 
@@ -23,7 +24,7 @@ import (
 
 var vendor = flag.String("vendor", "", "The USB vendor id of the usb device that shall be reset (ex: 1a86")
 var product = flag.String("product", "", "The USB product id of the usb device that shall be reset (ex: 7523)")
-var resetPath = flag.String("resetPath", "", "The USB device path to reset")
+var resetPath = flag.String("resetPath", "", "The USB device path to reset (ex: /dev/bus/usb/003/004)")
 var debug = flag.Bool("debug", false, "debug mode")
 
 func init() {
