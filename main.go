@@ -22,24 +22,19 @@ import (
 )
 
 var vendor = flag.String("vendor", "", "The USB vendor id of the usb device that shall be reset (ex: 1a86")
-var product = flag.String("product", "", "The USB product id of the usb device that shall be reset (ex: 7523")
+var product = flag.String("product", "", "The USB product id of the usb device that shall be reset (ex: 7523)")
+var pathToReset = flag.String("pathToReset", "", "The USB device path")
 var debug = flag.Bool("debug", false, "debug mode")
 
 func init() {
 	flag.StringVar(vendor, "v", "", "(shorthand for --vendor)")
 	flag.StringVar(product, "p", "", "(shorthand for --product)")
+	flag.StringVar(pathToReset, "rp", "", "(shorthand for --pathToReset)")
 	flag.BoolVar(debug, "d", false, "(shorthand for --debug)")
 }
 
-func main() {
-	flag.Parse()
-
-	if *vendor == "" || *product == "" {
-		flag.PrintDefaults()
-		fail("No vendor/product to reset specified!", nil)
-	}
+func getPathFromVendorProduct() string {
 	var pathToReset string
-
 	// look at usb_device types only (usb_interface devices have a directory
 	// in the form of 1-1:1-1), we want to reset devices
 	m, err := filepath.Glob("/sys/bus/usb/devices/[0-9]*-[0-9]*/uevent")
@@ -85,12 +80,26 @@ func main() {
 		break
 	}
 
-	if pathToReset == "" {
+	return pathToReset
+}
+func main() {
+	flag.Parse()
+
+	if *pathToReset == "" && (*vendor == "" || *product == "") {
+		flag.PrintDefaults()
+		fail("No path/vendor/product to reset specified!", nil)
+	}
+
+	if *pathToReset == "" {
+		*pathToReset = getPathFromVendorProduct()
+	}
+
+	if *pathToReset == "" {
 		fail("Could not ascertain path to reset", nil)
 	}
 
-	d("Resetting: " + pathToReset)
-	h, err := os.OpenFile(pathToReset, os.O_WRONLY, 666)
+	d("Resetting: " + *pathToReset)
+	h, err := os.OpenFile(*pathToReset, os.O_WRONLY, 666)
 	if err != nil {
 		fail("Could not open file", err)
 	}
